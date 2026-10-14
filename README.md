@@ -1,4 +1,4 @@
-# Terminal Rescue — Alonso García y Nixon Villamizar
+# Terminal Rescue — Alonso Esteban García Sandoval y Nixon Sneider Villamizar Sarmiento
 
 ## Descripción
 
@@ -6,8 +6,8 @@ Este proyecto repara el proceso de cierre mensual de afiliados de una Caja de Co
 
 ## Integrantes
 
-- Alonso García (GitHub: chipitaps)
-- Nixon Villamizar (GitHub: nixonsneider)
+- Alonso Esteban García Sandoval (GitHub: chipitaps)
+- Nixon Sneider Villamizar Sarmiento (GitHub: nixonsneider)
 
 ## Requisitos
 
