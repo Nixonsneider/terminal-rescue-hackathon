@@ -26,12 +26,9 @@ def escribir_csv(nombre, campos, filas):
 
 
 def nombre_completo(fila):
-    return "{0} {1} {2} {3}".format(
-        fila.get("NOM1", ""),
-        fila.get("NOM2", ""),
-        fila.get("APE1", ""),
-        fila.get("APE2", ""),
-    )
+    # NOM2 y APE2 pueden venir vacíos: se omiten para no dejar espacios dobles
+    partes = (fila.get("NOM1"), fila.get("NOM2"), fila.get("APE1"), fila.get("APE2"))
+    return " ".join(p.strip() for p in partes if p and p.strip())
 
 
 def normalizar_fecha(valor):
