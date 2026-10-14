@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------
 set -e
 
-ENTRADA=/opt/cierre/entrada
+ENTRADA=data
 SALIDA=output
 
 mkdir $SALIDA
@@ -27,9 +27,5 @@ TOTAL=$(tail -n +2 $ENTRADA/AFI_MAE.csv | wc -l)
 ACTIVOS=$(tail -n +2 $SALIDA/afiliados_activos.csv | wc -l)
 echo "total_afiliados=$TOTAL" >> $SALIDA/totales.txt
 echo "activos=$ACTIVOS" >> $SALIDA/totales.txt
-
-# El archivo de entrada ya fue procesado
-mkdir -p $ENTRADA/procesados
-mv $ENTRADA/AFI_MAE.csv $ENTRADA/procesados/
 
 echo "Cierre terminado"
