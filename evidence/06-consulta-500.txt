@@ -1,0 +1,28 @@
+# Incidente 6 - GET /afiliados/{documento} responde 500
+## Documento de prueba con segundo nombre vacio: 8871612039
+$ docker compose exec cierre-db psql -U cierre -d cierre -tc "select nro_doc, nom2 is null as nom2_nulo from afi_mae where nro_doc='8871612039'"
+ 8871612039 | t
+
+
+## ANTES (codigo original)
+$ curl -s -w ' [HTTP %{http_code}]' localhost:8081/afiliados/8871612039
+{"error": "error interno"} [HTTP 500]
+$ docker compose logs cierre-api | grep -A12 CIE-5003 | tail -14
+cierre-api-1  | 2026-10-14 04:08:01,563 ERROR [cierre-api] CIE-5003 Error interno consultando afiliado documento=8871612039
+cierre-api-1  | Traceback (most recent call last):
+cierre-api-1  |   File "/app/app.py", line 74, in do_GET
+cierre-api-1  |     member = find_member(documento)
+cierre-api-1  |              ^^^^^^^^^^^^^^^^^^^^^^
+cierre-api-1  |   File "/app/app.py", line 53, in find_member
+cierre-api-1  |     nombre = nom1 + " " + nom2 + " " + ape1 + " " + ape2
+cierre-api-1  |              ~~~~~~~~~~~^~~~~~
+cierre-api-1  | TypeError: can only concatenate str (not "NoneType") to str
+cierre-api-1  | 
+
+## DESPUES (nombre armado omitiendo campos NULL)
+$ curl -s -w ' [HTTP %{http_code}]' localhost:8081/afiliados/8871612039
+{"documento": "8871612039", "nombre": "SANDRA PABON JIMENEZ", "estado": "INACTIVO", "empresa": "TECNOLOGIAS SAN LUIS S EN C"} [HTTP 200]
+$ curl -s -w ' [HTTP %{http_code}]' localhost:8081/afiliados/1098765432
+{"documento": "1098765432", "nombre": "JUAN CARLOS PEREZ GOMEZ", "estado": "ACTIVO", "empresa": "EMPRESA ABC"} [HTTP 200]
+$ curl -s -w ' [HTTP %{http_code}]' localhost:8081/afiliados/0000000001
+{"error": "afiliado no encontrado"} [HTTP 404]
