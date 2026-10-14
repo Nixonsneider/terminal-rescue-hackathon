@@ -1,0 +1,23 @@
+== Primeras líneas de excepciones.csv ==
+documento,tipo,detalle
+3753924849,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+1020751549,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+6035736385,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+1344766047,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+88361387,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+88576694,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+1367901463,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+88724664,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+1341837102,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+8869583590,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+3719530955,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+1371283409,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+8869124143,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+13824220,DUPLICADO,Documento repetido en AFI_MAE; se conserva la primera aparicion
+
+== Conteo por tipo de excepción ==
+     20 DUPLICADO
+     18 SIN_EMPRESA
+     15 BENEFICIARIO_HUERFANO
+     14 CODIGO_INVALIDO
+      1 tipo
