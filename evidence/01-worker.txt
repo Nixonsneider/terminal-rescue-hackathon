@@ -1,0 +1,28 @@
+# Incidente 1 - cierre-worker en Exited (1)
+## ANTES: .env con WORKER_INTERVAL_SECONDS=30s
+$ grep WORKER_INTERVAL_SECONDS .env
+WORKER_INTERVAL_SECONDS=30s
+
+$ docker compose ps -a
+NAME                              IMAGE                           COMMAND                  SERVICE         CREATED          STATUS                     PORTS
+terminal-rescue-cierre-api-1      terminal-rescue-cierre-api      "python app.py"          cierre-api      5 minutes ago    Up 5 minutes               0.0.0.0:8081->8081/tcp, [::]:8081->8081/tcp
+terminal-rescue-cierre-db-1       postgres:16-alpine              "docker-entrypoint.s…"   cierre-db       5 minutes ago    Up 5 minutes (healthy)     5432/tcp
+terminal-rescue-cierre-worker-1   terminal-rescue-cierre-worker   "python worker.py"       cierre-worker   13 seconds ago   Exited (1) 8 seconds ago   
+
+$ docker compose logs cierre-worker | tail -5
+cierre-worker-1  | [2026-10-14T04:06:58Z] [ERROR] codigo=CIE-1107 WORKER_INTERVAL_SECONDS debe ser un entero de segundos; valor recibido: '30s'
+
+## DESPUES: WORKER_INTERVAL_SECONDS=30
+$ grep WORKER_INTERVAL_SECONDS .env
+WORKER_INTERVAL_SECONDS=30
+
+$ docker compose ps
+NAME                              IMAGE                           COMMAND                  SERVICE         CREATED          STATUS                   PORTS
+terminal-rescue-cierre-api-1      terminal-rescue-cierre-api      "python app.py"          cierre-api      5 minutes ago    Up 5 minutes             0.0.0.0:8081->8081/tcp, [::]:8081->8081/tcp
+terminal-rescue-cierre-db-1       postgres:16-alpine              "docker-entrypoint.s…"   cierre-db       5 minutes ago    Up 5 minutes (healthy)   5432/tcp
+terminal-rescue-cierre-worker-1   terminal-rescue-cierre-worker   "python worker.py"       cierre-worker   10 seconds ago   Up 8 seconds             
+
+$ docker compose logs cierre-worker | tail -3
+cierre-worker-1  | [2026-10-14T04:07:09Z] [INFO] cierre-worker iniciado; intervalo=30s
+cierre-worker-1  | [2026-10-14T04:07:09Z] [INFO] conciliacion registros=1520 documentos_distintos=1500
+
