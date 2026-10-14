@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Cierre mensual de afiliados activos."""
 import csv
+from datetime import datetime
 import os
+import re
 from collections import OrderedDict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,6 +32,39 @@ def nombre_completo(fila):
         fila.get("APE1", ""),
         fila.get("APE2", ""),
     )
+
+
+def normalizar_fecha(valor):
+    """Normaliza fecha a YYYY-MM-DD (ISO) aceptando YYYY-MM-DD, DD/MM/YYYY y YYYYMMDD.
+
+    Valida fechas reales (ej. 29 de febrero solo en año bisiesto).
+    Devuelve la fecha en formato YYYY-MM-DD o None si es inválida.
+    """
+    if not valor:
+        return None
+    val = valor.strip()
+    # 1. Formato YYYY-MM-DD (ISO)
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", val):
+        try:
+            dt = datetime.strptime(val, "%Y-%m-%d")
+            return dt.strftime("%Y-%m-%d")
+        except ValueError:
+            return None
+    # 2. Formato DD/MM/YYYY
+    if re.match(r"^\d{2}/\d{2}/\d{4}$", val):
+        try:
+            dt = datetime.strptime(val, "%d/%m/%Y")
+            return dt.strftime("%Y-%m-%d")
+        except ValueError:
+            return None
+    # 3. Formato YYYYMMDD
+    if re.match(r"^\d{8}$", val):
+        try:
+            dt = datetime.strptime(val, "%Y%m%d")
+            return dt.strftime("%Y-%m-%d")
+        except ValueError:
+            return None
+    return None
 
 
 def main():
@@ -106,7 +141,24 @@ def main():
             }
         )
 
-    # 4. Huérfanos: el afiliado del beneficiario no está en el maestro (tras duplicados).
+    # 4. Fechas: YYYY-MM-DD, DD/MM/YYYY y YYYYMMDD se normalizan a ISO (YYYY-MM-DD).
+    # Si la fecha es inválida (N/A, 2023/02/29, etc.) se reporta FECHA_INVALIDA.
+    # IMPORTANTE: FECHA_INVALIDA NO excluye al afiliado, sigue contando normal.
+    for documento, fila in unicos.items():
+        fec_raw = (fila.get("FEC_AFI") or "").strip()
+        fec_iso = normalizar_fecha(fec_raw)
+        if fec_iso is not None:
+            fila["FEC_AFI"] = fec_iso
+        else:
+            excepciones.append(
+                {
+                    "documento": documento,
+                    "tipo": "FECHA_INVALIDA",
+                    "detalle": "FEC_AFI={0}".format(fec_raw or "(vacio)"),
+                }
+            )
+
+    # 5. Huérfanos: el afiliado del beneficiario no está en el maestro (tras duplicados).
     documentos_maestro = set(unicos)
     for fila in beneficiarios:
         doc_afi = (fila.get("NRO_DOC_AFI") or "").strip()
@@ -138,11 +190,10 @@ def main():
     # TODO: nombre de la empresa desde EMPRESA.csv
     # TODO: contar beneficiarios desde AFI_BEN.csv
     # TODO: último aporte desde APORTES.csv (YYYY-MM)
-    # TODO: FECHA_INVALIDA
     # TODO: cruce con el extracto de Caja Oriente
 
     totales_path = os.path.join(SALIDA, "totales.txt")
-    with open(totales_path, "a", encoding="utf-8") as handle:
+    with open(totales_path, "w", encoding="utf-8") as handle:
         handle.write("total_afiliados={0}\n".format(len(unicos)))
         handle.write("activos={0}\n".format(len(activos)))
 

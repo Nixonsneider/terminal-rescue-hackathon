@@ -53,11 +53,11 @@ Revisen con: ./validator entregables
 - **Evidencia:** evidence/06-consulta-500.txt
 
 ## Incidente 7
-- **Síntoma:**
-- **Diagnóstico:**
-- **Comandos:**
-- **Solución:**
-- **Evidencia:**
+- **Síntoma:** Fechas de afiliación en formatos no estándar (DD/MM/YYYY, YYYYMMDD) y valores con fechas no válidas (2023/02/29, 2025-02-30, SIN FECHA, N/A) que rompen la consistencia del cierre.
+- **Diagnóstico:** Existen registros en AFI_MAE.csv con fechas en múltiples formatos y 12 registros con fechas inexistentes o corruptas que deben reportarse sin excluir al afiliado de los totales.
+- **Comandos:** `grep "FECHA_INVALIDA" output/excepciones.csv | wc -l`
+- **Solución:** Implementación de función normalizar_fecha en scripts/cierre.py que acepta YYYY-MM-DD, DD/MM/YYYY y YYYYMMDD, valida años bisiestos y fechas reales, convierte las válidas a formato ISO y registra las 12 fechas inválidas en output/excepciones.csv sin descartar al afiliado.
+- **Evidencia:** evidence/07-fechas.txt
 
 ## Incidente 8
 - **Síntoma:**
