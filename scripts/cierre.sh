@@ -9,7 +9,7 @@ ENTRADA=data
 SALIDA=output
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-mkdir $SALIDA
+mkdir -p "$SALIDA"
 
 if python3 -c "import csv" >/dev/null 2>&1; then
   python3 "$SCRIPT_DIR/cierre.py"

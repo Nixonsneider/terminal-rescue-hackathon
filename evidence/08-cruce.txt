@@ -1,0 +1,19 @@
+== Primeras excepciones de CRUCE_NO_COINCIDE ==
+documento,tipo,detalle
+6060554836,CRUCE_NO_COINCIDE,situacion=RETIRADO no coincide con EST_AFI=A
+1008958781,CRUCE_NO_COINCIDE,situacion=RETIRADO no coincide con EST_AFI=A
+1002471016,CRUCE_NO_COINCIDE,Documento no existe en AFI_MAE (situacion=VIGENTE)
+60638164,CRUCE_NO_COINCIDE,situacion=RETIRADO no coincide con EST_AFI=A
+1043196119,CRUCE_NO_COINCIDE,Documento no existe en AFI_MAE (situacion=VIGENTE)
+3741495054,CRUCE_NO_COINCIDE,situacion=VIGENTE no coincide con EST_AFI=I
+1027394279,CRUCE_NO_COINCIDE,Documento no existe en AFI_MAE (situacion=VIGENTE)
+3739675472,CRUCE_NO_COINCIDE,situacion=VIGENTE no coincide con EST_AFI=I
+1000385358,CRUCE_NO_COINCIDE,Documento no existe en AFI_MAE (situacion=VIGENTE)
+6039035908,CRUCE_NO_COINCIDE,situacion=RETIRADO no coincide con EST_AFI=A
+13198168,CRUCE_NO_COINCIDE,situacion=RETIRADO no coincide con EST_AFI=A
+1057370088,CRUCE_NO_COINCIDE,Documento no existe en AFI_MAE (situacion=VIGENTE)
+1307174900,CRUCE_NO_COINCIDE,situacion=VIGENTE no coincide con EST_AFI=I
+3719889042,CRUCE_NO_COINCIDE,situacion=VIGENTE no coincide con EST_AFI=I
+8832988347,CRUCE_NO_COINCIDE,situacion=RETIRADO no coincide con EST_AFI=A
+
+Total excepciones CRUCE_NO_COINCIDE: 25

@@ -4,17 +4,17 @@ import csv
 from datetime import datetime
 import os
 import re
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENTRADA = os.path.join(ROOT, "data")
 SALIDA = os.path.join(ROOT, "output")
 
 
-def leer_csv(nombre):
+def leer_csv(nombre, delimiter=","):
     ruta = os.path.join(ENTRADA, nombre)
     with open(ruta, encoding="utf-8", newline="") as handle:
-        return list(csv.DictReader(handle))
+        return list(csv.DictReader(handle, delimiter=delimiter))
 
 
 def escribir_csv(nombre, campos, filas):
@@ -75,8 +75,26 @@ def main():
         fila["COD_EMP"]: fila for fila in leer_csv("EMPRESA.csv")
     }
     beneficiarios = leer_csv("AFI_BEN.csv")
+    aportes_csv = leer_csv("APORTES.csv")
+    extracto_oriente = leer_csv("extracto_caja_oriente.csv", delimiter=";")
 
     print("Leyendo afiliados desde {0}/AFI_MAE.csv".format(ENTRADA.replace("\\", "/")))
+
+    # Precalcular conteo de beneficiarios por afiliado
+    beneficiarios_por_afiliado = defaultdict(int)
+    for fila_ben in beneficiarios:
+        doc_afi = (fila_ben.get("NRO_DOC_AFI") or "").strip()
+        if doc_afi:
+            beneficiarios_por_afiliado[doc_afi] += 1
+
+    # Precalcular último aporte (periodo mayor YYYY-MM) por afiliado
+    ultimo_aporte_por_afiliado = {}
+    for fila_apo in aportes_csv:
+        doc_apo = (fila_apo.get("NRO_DOC") or "").strip()
+        periodo = (fila_apo.get("PERIODO") or "").strip()
+        if doc_apo and periodo:
+            if doc_apo not in ultimo_aporte_por_afiliado or periodo > ultimo_aporte_por_afiliado[doc_apo]:
+                ultimo_aporte_por_afiliado[doc_apo] = periodo
 
     # 1. Duplicados: se conserva la primera aparición; DUPLICADO una vez por documento.
     unicos = OrderedDict()
@@ -129,15 +147,20 @@ def main():
                 }
             )
             continue
+
+        nom_empresa = empresas_por_codigo.get(cod_emp, {}).get("NOM_EMP", "")
+        cant_beneficiarios = str(beneficiarios_por_afiliado.get(documento, 0))
+        ultimo_periodo = ultimo_aporte_por_afiliado.get(documento, "")
+
         activos.append(
             {
                 "documento": documento,
                 "nombre": nombre_completo(fila),
                 "estado": "ACTIVO",
                 "cod_empresa": cod_emp,
-                "empresa": "",
-                "beneficiarios": "0",
-                "ultimo_aporte": "",
+                "empresa": nom_empresa,
+                "beneficiarios": cant_beneficiarios,
+                "ultimo_aporte": ultimo_periodo,
             }
         )
 
@@ -172,6 +195,31 @@ def main():
             }
         )
 
+    # 6. Cruce con Caja Oriente: comparar con el extracto enviado
+    for fila_ext in extracto_oriente:
+        raw_doc = (fila_ext.get("id_afiliado") or "").strip()
+        doc_cruce = raw_doc.lstrip("0")
+        situacion = (fila_ext.get("situacion") or "").strip().upper()
+        if doc_cruce not in unicos:
+            excepciones.append(
+                {
+                    "documento": doc_cruce,
+                    "tipo": "CRUCE_NO_COINCIDE",
+                    "detalle": "Documento no existe en AFI_MAE (situacion={0})".format(situacion),
+                }
+            )
+        else:
+            est_afi = (unicos[doc_cruce].get("EST_AFI") or "").strip()
+            esperado = "VIGENTE" if est_afi == "A" else ("RETIRADO" if est_afi == "I" else None)
+            if situacion != esperado:
+                excepciones.append(
+                    {
+                        "documento": doc_cruce,
+                        "tipo": "CRUCE_NO_COINCIDE",
+                        "detalle": "situacion={0} no coincide con EST_AFI={1}".format(situacion, est_afi),
+                    }
+                )
+
     escribir_csv(
         "afiliados_activos.csv",
         [
@@ -187,15 +235,19 @@ def main():
     )
     escribir_csv("excepciones.csv", ["documento", "tipo", "detalle"], excepciones)
 
-    # TODO: nombre de la empresa desde EMPRESA.csv
-    # TODO: contar beneficiarios desde AFI_BEN.csv
-    # TODO: último aporte desde APORTES.csv (YYYY-MM)
-    # TODO: cruce con el extracto de Caja Oriente
+    # 7. Totales: total_afiliados, activos, inactivos y total de excepciones
+    inactivos = [
+        doc
+        for doc, fila in validos.items()
+        if (fila.get("EST_AFI") or "").strip() == "I"
+    ]
 
     totales_path = os.path.join(SALIDA, "totales.txt")
     with open(totales_path, "w", encoding="utf-8") as handle:
         handle.write("total_afiliados={0}\n".format(len(unicos)))
         handle.write("activos={0}\n".format(len(activos)))
+        handle.write("inactivos={0}\n".format(len(inactivos)))
+        handle.write("excepciones={0}\n".format(len(excepciones)))
 
     print("Cierre terminado")
 

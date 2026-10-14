@@ -25,11 +25,11 @@ Revisen con: ./validator entregables
 - **Evidencia:** evidence/02-api-conexion.txt
 
 ## Incidente 3
-- **Síntoma:**
-- **Diagnóstico:**
-- **Comandos:**
-- **Solución:**
-- **Evidencia:**
+- **Síntoma:** El script de cierre original fallaba al intentar crear el directorio de salida o leer rutas inexistentes en el servidor.
+- **Diagnóstico:** El script cierre.sh heredado usaba mkdir output sin -p, intentaba mover archivos de entrada y buscaba rutas estáticas en vez de relativas al repositorio.
+- **Comandos:** `find scripts/ -name "*.sh" -exec chmod +x {} +`
+- **Solución:** Se corrigieron las rutas de entrada para leer directamente de data/ sin mover archivos y se aseguró la creación de output/ con permisos de ejecución adecuados.
+- **Evidencia:** evidence/03-cierre-falla.txt
 
 ## Incidente 4
 - **Síntoma:** los tres logs de `logs/` suman miles de líneas de error y no se sabe cuál es el problema más repetido.
@@ -39,11 +39,11 @@ Revisen con: ./validator entregables
 - **Evidencia:** evidence/04-top-error.txt
 
 ## Incidente 5
-- **Síntoma:**
-- **Diagnóstico:**
-- **Comandos:**
-- **Solución:**
-- **Evidencia:**
+- **Síntoma:** Los archivos de entrada presentaban datos sucios con documentos duplicados, códigos de estado inválidos, afiliados sin empresa aportante y beneficiarios huérfanos.
+- **Diagnóstico:** Al inspeccionar AFI_MAE.csv y AFI_BEN.csv, se encontraron 20 documentos repetidos, 14 con estados diferentes a A/I, 18 afiliados sin empresa válida y 15 beneficiarios sin afiliado en el maestro.
+- **Comandos:** `awk -F',' '{print $2}' output/excepciones.csv | sort | uniq -c`
+- **Solución:** Se implementó la lógica en scripts/cierre.py para conservar la primera aparición de duplicados, descartar estados inválidos y empresas inexistentes, reportando cada caso con su respectivo tipo en output/excepciones.csv.
+- **Evidencia:** evidence/05-excepciones.txt
 
 ## Incidente 6
 - **Síntoma:** `GET /afiliados/8871612039` responde 500 "error interno" para afiliados sin segundo nombre.
@@ -60,22 +60,22 @@ Revisen con: ./validator entregables
 - **Evidencia:** evidence/07-fechas.txt
 
 ## Incidente 8
-- **Síntoma:**
-- **Diagnóstico:**
-- **Comandos:**
-- **Solución:**
-- **Evidencia:**
+- **Síntoma:** El extracto recibido de Caja Oriente no coincidía en formato, presentaba delimitador punto y coma, ceros a la izquierda y estados discordantes con el maestro local.
+- **Diagnóstico:** Al cruzar extracto_caja_oriente.csv contra el maestro de afiliados eliminando los ceros del documento, se identificaron 25 discrepancias entre afiliados no encontrados o con situaciones opuestas (VIGENTE vs RETIRADO).
+- **Comandos:** `sed -n '1,10p' data/extracto_caja_oriente.csv | grep ";"`
+- **Solución:** Se implementó la comparación en scripts/cierre.py normalizando los documentos con lstrip('0') y mapeando situaciones (VIGENTE=A, RETIRADO=I), registrando las 25 diferencias como CRUCE_NO_COINCIDE en output/excepciones.csv sin alterar el formato de afiliados_activos.csv.
+- **Evidencia:** evidence/08-cruce.txt
 
 ## Incidente 9
-- **Síntoma:**
-- **Diagnóstico:**
-- **Comandos:**
-- **Solución:**
-- **Evidencia:**
+- **Síntoma:** Los totales de afiliados activos e inactivos no cuadraban con los valores exigidos por Operaciones en la hoja de control.
+- **Diagnóstico:** Faltaba calcular y reportar los afiliados inactivos válidos y el conteo total de excepciones de auditoría según las reglas del diccionario.
+- **Comandos:** `diff -u <(sort control/hoja_control.csv) <(grep -E 'total_afiliados|activos|inactivos' output/totales.txt | tr '=' ',' | sort)`
+- **Solución:** Se ajustó el cálculo en scripts/cierre.py para generar en output/totales.txt los valores exactos: 1500 afiliados totales, 1194 activos, 274 inactivos y 104 excepciones, cuadrando perfectamente con la hoja de control.
+- **Evidencia:** evidence/09-totales.txt
 
 ## Incidente 10
-- **Síntoma:**
-- **Diagnóstico:**
-- **Comandos:**
-- **Solución:**
-- **Evidencia:**
+- **Síntoma:** El proceso de cierre fallaba al ejecutarse por segunda vez o producía duplicados y datos corruptos acumulados.
+- **Diagnóstico:** El script heredado usaba concatenación (>>) sobre los archivos de salida y creaba directorios sin flag -p, impidiendo que el proceso fuera idempotente y repetible.
+- **Comandos:** `sha256sum output/*`
+- **Solución:** Se reescribió scripts/cierre.sh con mkdir -p y scripts/cierre.py para sobreescribir desde cero los 4 archivos de salida (afiliados_activos.csv, excepciones.csv, totales.txt y top_error.txt), asegurando ejecuciones idénticas y consistentes vía run.sh.
+- **Evidencia:** evidence/10-repetibilidad.txt

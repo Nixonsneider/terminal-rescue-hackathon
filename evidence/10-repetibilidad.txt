@@ -1,0 +1,21 @@
+== Prueba de repetibilidad de ./run.sh ==
+Primera ejecución:
+Leyendo afiliados desde data/AFI_MAE.csv
+Cierre terminado
+codigo_error=CIE-4012
+ocurrencias=1424
+
+Segunda ejecución:
+Leyendo afiliados desde data/AFI_MAE.csv
+Cierre terminado
+codigo_error=CIE-4012
+ocurrencias=1424
+
+Hashes SHA-256 de las cuatro salidas tras ambas ejecuciones:
+cf51afac5981ac6cb2033c5dca13298e3fb4ddc15123642c682282b5fbffe595 *output/afiliados_activos.csv
+af1cd4c76c0b01c1d8188881ab7dc49b83954abe97b85ebe4b0b1b19083a5a81 *output/excepciones.csv
+be92aa0328bd49cfa0d6157537090e3e39ddb66061663b8893e4c93c5b40869a *output/top_error.txt
+57c5b19781be76e2f285f4d3127491b0d5e488e2db965a69ff213405bfab5913 *output/totales.txt
+
+diff -r entre output_corrida_1 y output_corrida_2: sin diferencias (salida idéntica).
+El proceso es completamente idempotente y genera todos los archivos desde cero.

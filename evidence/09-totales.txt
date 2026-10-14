@@ -1,0 +1,19 @@
+== Comparación de totales con control/hoja_control.csv ==
+hoja_control.csv:
+clave,valor
+fecha_corte,2026-09-30
+total_afiliados,1500
+activos,1194
+inactivos,274
+
+output/totales.txt:
+total_afiliados=1500
+activos=1194
+inactivos=274
+excepciones=104
+
+Verificación:
+total_afiliados: esperado=1500, obtenido=1500 (OK)
+activos: esperado=1194, obtenido=1194 (OK)
+inactivos: esperado=274, obtenido=274 (OK)
+excepciones: obtenido=104 (coincide con total de filas en excepciones.csv sin encabezado)
