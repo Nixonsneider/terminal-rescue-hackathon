@@ -1,0 +1,6 @@
+# Los scripts deben conservar saltos de línea de Linux (LF) para ejecutarse con bash en el servidor
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.csv text eol=lf
+validator text eol=lf
