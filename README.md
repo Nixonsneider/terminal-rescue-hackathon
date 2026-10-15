@@ -14,7 +14,7 @@ Este proyecto repara el proceso de cierre mensual de afiliados de una Caja de Co
 - Docker Desktop o Docker Engine con el plugin `docker compose`.
 - Python 3 (solo la librería estándar) y Bash para ejecutar `run.sh`.
 - Git, `curl` y las utilidades estándar de Linux (`grep`, `awk`, `sort`, `uniq`).
-- Probado en Windows 11 con WSL y en Linux.
+- Probado en Windows 11 con Docker Desktop y WSL (Ubuntu); el cierre corre igual en cualquier Linux.
 
 ## Instalación y ejecución
 
