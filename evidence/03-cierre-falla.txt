@@ -1,1 +1,37 @@
+# Incidente 3 - el script de cierre no lee su archivo de entrada
+## ANTES (scripts/cierre.sh original)
+$ grep -n ENTRADA= scripts/cierre.sh
+8:ENTRADA=/opt/cierre/entrada
+
+$ ls -ld /opt/cierre/entrada
+ls: cannot access '/opt/cierre/entrada': No such file or directory
+
+$ find scripts -name "*.sh" -exec ls -l {} +
+-rwxrwxrwx 1 root root 1351 Oct 15 00:30 scripts/cierre.sh
+
+$ bash scripts/cierre.sh
+Leyendo afiliados desde /opt/cierre/entrada/AFI_MAE.csv
+awk: cannot open "/opt/cierre/entrada/AFI_MAE.csv" (No such file or directory)
+codigo de salida: 2
+
+$ bash scripts/cierre.sh   (segunda corrida: ya existe output/)
 mkdir: cannot create directory ‘output’: File exists
+
+## DESPUES (ruta corregida a data/ y script reescrito)
+$ find scripts -name "*.sh" -exec ls -l {} +
+-rwxrwxrwx 1 root root 550 Oct 15 00:30 scripts/cierre.sh
+-rwxrwxrwx 1 root root 571 Oct 15 00:30 scripts/top_error.sh
+
+$ ./run.sh >/dev/null; echo $?
+codigo de salida: 0
+
+$ ls output
+afiliados_activos.csv
+excepciones.csv
+top_error.txt
+totales.txt
+
+$ wc -l data/AFI_MAE.csv output/afiliados_activos.csv
+  1521 data/AFI_MAE.csv
+  1195 output/afiliados_activos.csv
+  2716 total

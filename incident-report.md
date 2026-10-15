@@ -25,10 +25,10 @@ Revisen con: ./validator entregables
 - **Evidencia:** evidence/02-api-conexion.txt
 
 ## Incidente 3
-- **Síntoma:** El script de cierre original fallaba al intentar crear el directorio de salida o leer rutas inexistentes en el servidor.
-- **Diagnóstico:** El script cierre.sh heredado usaba mkdir output sin -p, intentaba mover archivos de entrada y buscaba rutas estáticas en vez de relativas al repositorio.
-- **Comandos:** `find scripts/ -name "*.sh" -exec chmod +x {} +`
-- **Solución:** Se corrigieron las rutas de entrada para leer directamente de data/ sin mover archivos y se aseguró la creación de output/ con permisos de ejecución adecuados.
+- **Síntoma:** `./run.sh` termina con error: el script de cierre no puede leer su archivo de entrada (`awk: cannot open "/opt/cierre/entrada/AFI_MAE.csv"`, código de salida 2).
+- **Diagnóstico:** con `grep -n ENTRADA= scripts/cierre.sh` se ve que la entrada era la ruta fija `/opt/cierre/entrada`, que no existe en el servidor (`ls -ld` lo confirma); los CSV están en `data/`. Además el script usaba `mkdir` sin `-p` y fallaba en la segunda corrida, y movía el archivo de entrada con `mv`.
+- **Comandos:** `grep -n ENTRADA= scripts/cierre.sh`, `ls -ld /opt/cierre/entrada`, `find scripts -name "*.sh" -exec ls -l {} +`, `chmod +x run.sh scripts/*.sh`, `bash scripts/cierre.sh`
+- **Solución:** la entrada pasó a leerse de `data/` con rutas relativas al repositorio, se usa `mkdir -p` y ya no se mueve ningún archivo. Los scripts quedan con permiso de ejecución y `./run.sh` termina con código 0 y genera los cuatro archivos de `output/`.
 - **Evidencia:** evidence/03-cierre-falla.txt
 
 ## Incidente 4
